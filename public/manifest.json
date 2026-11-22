@@ -1,0 +1,18 @@
+{
+  "name": "BRO SQUAD - Shared Room Expense Manager",
+  "short_name": "BRO SQUAD",
+  "description": "Premium shared room expense tracker and debt settlement calculator for roommates",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#EAF2FC",
+  "theme_color": "#173B67",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
