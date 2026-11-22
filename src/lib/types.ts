@@ -38,10 +38,13 @@ export const PAYMENT_METHODS: PaymentMethod[] = [
 
 export interface Profile {
   id: string;
+  username: string;
+  password?: string;
   full_name: string;
-  email: string;
-  avatar_url?: string | null;
+  email?: string;
   phone?: string | null;
+  role: 'admin' | 'member';
+  avatar_url?: string | null;
   created_at?: string;
   updated_at?: string;
 }
@@ -126,7 +129,9 @@ export interface MemberBalance {
   user_id: string;
   full_name: string;
   email: string;
+  username?: string;
   avatar_url?: string | null;
+  role?: 'admin' | 'member';
   total_paid_paisa: number;
   total_share_paisa: number;
   settlements_sent_paisa: number;

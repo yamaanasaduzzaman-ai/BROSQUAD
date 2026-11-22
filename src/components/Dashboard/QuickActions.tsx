@@ -3,6 +3,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { PlusCircle, UserPlus, ArrowRightLeft, BarChart3, Receipt } from 'lucide-react';
+import { useAuth } from '../../context/AuthContext';
 
 interface QuickActionsProps {
   onOpenSettleModal?: () => void;
@@ -13,6 +14,7 @@ export const QuickActions: React.FC<QuickActionsProps> = ({
   onOpenSettleModal,
   onOpenAddMember,
 }) => {
+  const { isAdmin } = useAuth();
   return (
     <div className="grid grid-cols-4 gap-1.5 sm:gap-2 my-2 sm:my-3">
       {/* 1. Add Expense */}
@@ -24,15 +26,25 @@ export const QuickActions: React.FC<QuickActionsProps> = ({
         <span className="text-[10px] font-bold tracking-tight">+ Expense</span>
       </Link>
 
-      {/* 2. Add Member */}
-      <button
-        type="button"
-        onClick={onOpenAddMember}
-        className="flex flex-col items-center justify-center py-2 px-1 rounded-xl bg-white/75 hover:bg-white text-navy-900 border border-white/80 active:scale-95 transition-all text-center shadow-glass-sm"
-      >
-        <UserPlus className="w-4 h-4 text-accent mb-0.5" />
-        <span className="text-[10px] font-bold text-navy-900 tracking-tight">+ Member</span>
-      </button>
+      {/* 2. Add Member or Roommates Link */}
+      {isAdmin ? (
+        <button
+          type="button"
+          onClick={onOpenAddMember}
+          className="flex flex-col items-center justify-center py-2 px-1 rounded-xl bg-white/75 hover:bg-white text-navy-900 border border-white/80 active:scale-95 transition-all text-center shadow-glass-sm"
+        >
+          <UserPlus className="w-4 h-4 text-accent mb-0.5" />
+          <span className="text-[10px] font-bold text-navy-900 tracking-tight">+ Member</span>
+        </button>
+      ) : (
+        <Link
+          href="/members"
+          className="flex flex-col items-center justify-center py-2 px-1 rounded-xl bg-white/75 hover:bg-white text-navy-900 border border-white/80 active:scale-95 transition-all text-center shadow-glass-sm"
+        >
+          <UserPlus className="w-4 h-4 text-accent mb-0.5" />
+          <span className="text-[10px] font-bold text-navy-900 tracking-tight">Members</span>
+        </Link>
+      )}
 
       {/* 3. Settle Up */}
       <button

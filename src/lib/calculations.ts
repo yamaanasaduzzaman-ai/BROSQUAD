@@ -140,8 +140,10 @@ export function calculateMemberBalances(
     result.push({
       user_id: userId,
       full_name: data.profile.full_name,
-      email: data.profile.email,
+      email: data.profile.email || '',
+      username: data.profile.username,
       avatar_url: data.profile.avatar_url,
+      role: data.profile.role,
       total_paid_paisa: data.totalPaid,
       total_share_paisa: data.totalShare,
       settlements_sent_paisa: data.settlementsSent,

@@ -16,7 +16,7 @@ export const MemberBalancesOverview: React.FC<MemberBalancesOverviewProps> = ({
   onOpenAddMember,
 }) => {
   const { memberBalances, members } = useRoom();
-  const { currentUser } = useAuth();
+  const { currentUser, isAdmin } = useAuth();
 
   return (
     <GlassCard className="p-3 sm:p-4 mb-3">
@@ -28,7 +28,7 @@ export const MemberBalancesOverview: React.FC<MemberBalancesOverviewProps> = ({
           </h3>
         </div>
         <div className="flex items-center gap-2">
-          {onOpenAddMember && (
+          {isAdmin && onOpenAddMember && (
             <button
               onClick={onOpenAddMember}
               className="p-1 rounded-lg bg-navy-50 hover:bg-navy-100 text-accent transition-colors"

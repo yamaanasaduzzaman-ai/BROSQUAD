@@ -32,7 +32,7 @@ export const ExpenseDetailModal: React.FC<ExpenseDetailModalProps> = ({
   onClose,
   onEdit,
 }) => {
-  const { currentUser } = useAuth();
+  const { currentUser, isAdmin } = useAuth();
   const { deleteExpense } = useRoom();
   const [showConfirmDelete, setShowConfirmDelete] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -41,6 +41,7 @@ export const ExpenseDetailModal: React.FC<ExpenseDetailModalProps> = ({
 
   const isPayer = expense.paid_by === currentUser?.id;
   const isCreator = expense.created_by === currentUser?.id;
+  const canModify = isAdmin || isPayer || isCreator;
   const payerName = expense.payer?.full_name || 'Roommate';
 
   const handleDelete = async () => {
@@ -185,7 +186,7 @@ export const ExpenseDetailModal: React.FC<ExpenseDetailModalProps> = ({
               </GlassButton>
             </div>
           </div>
-        ) : (
+        ) : canModify ? (
           <div className="flex items-center gap-2 pt-2">
             <GlassButton
               variant="outline"
@@ -210,7 +211,7 @@ export const ExpenseDetailModal: React.FC<ExpenseDetailModalProps> = ({
               Delete
             </GlassButton>
           </div>
-        )}
+        ) : null}
       </div>
     </Modal>
   );

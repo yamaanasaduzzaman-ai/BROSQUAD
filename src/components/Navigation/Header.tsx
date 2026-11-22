@@ -15,6 +15,7 @@ import {
   BarChart3,
   Plus,
   Sparkles,
+  ShieldCheck,
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useRoom } from '../../context/RoomContext';
@@ -23,7 +24,7 @@ import { AddMemberModal } from '../Members/AddMemberModal';
 
 export const Header: React.FC = () => {
   const pathname = usePathname();
-  const { currentUser, switchUser, logout } = useAuth();
+  const { currentUser, isAdmin, switchUser, logout } = useAuth();
   const { room, members } = useRoom();
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [showAddMember, setShowAddMember] = useState(false);
@@ -46,15 +47,17 @@ export const Header: React.FC = () => {
               </span>
             </Link>
 
-            {/* Quick Add Member button */}
-            <button
-              onClick={() => setShowAddMember(true)}
-              className="p-1.5 rounded-xl bg-white/70 hover:bg-white text-navy-800 border border-white/80 shadow-sm flex items-center gap-1 text-[11px] font-bold ml-1 transition-all"
-              title="Add Roommate"
-            >
-              <UserPlus className="w-3.5 h-3.5 text-accent" />
-              <span className="hidden sm:inline">Add Member</span>
-            </button>
+            {/* Quick Add Member button (Admin only) */}
+            {isAdmin && (
+              <button
+                onClick={() => setShowAddMember(true)}
+                className="p-1.5 rounded-xl bg-white/70 hover:bg-white text-navy-800 border border-white/80 shadow-sm flex items-center gap-1 text-[11px] font-bold ml-1 transition-all"
+                title="Add Roommate"
+              >
+                <UserPlus className="w-3.5 h-3.5 text-accent" />
+                <span className="hidden sm:inline">Add Member</span>
+              </button>
+            )}
           </div>
 
           {/* Compact Desktop Navigation */}

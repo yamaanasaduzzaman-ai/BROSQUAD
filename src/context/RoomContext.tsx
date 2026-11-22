@@ -25,7 +25,15 @@ interface RoomContextType {
   overview: RoomOverview;
   isLoading: boolean;
   refreshData: () => Promise<void>;
-  addMember: (data: { full_name: string; email?: string; phone?: string }) => Promise<Profile>;
+  addMember: (data: {
+    full_name: string;
+    username: string;
+    password?: string;
+    email?: string;
+    phone?: string;
+    role?: 'admin' | 'member';
+  }) => Promise<Profile>;
+  updateMember: (id: string, updates: Partial<Profile>) => Promise<Profile>;
   deleteMember: (id: string) => Promise<void>;
   addExpense: (expenseData: {
     title: string;
@@ -125,13 +133,27 @@ export const RoomProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // Add Member
   const handleAddMember = async (data: {
     full_name: string;
+    username: string;
+    password?: string;
     email?: string;
     phone?: string;
+    role?: 'admin' | 'member';
   }): Promise<Profile> => {
     const created = await DataRepository.addMember(data);
     await refreshData();
     showToast(`Member "${created.full_name}" added`, 'success');
     return created;
+  };
+
+  // Update Member
+  const handleUpdateMember = async (
+    id: string,
+    updates: Partial<Profile>
+  ): Promise<Profile> => {
+    const updated = await DataRepository.updateMemberProfile(id, updates);
+    await refreshData();
+    showToast(`Member "${updated.full_name}" updated`, 'success');
+    return updated;
   };
 
   // Delete Member
@@ -240,6 +262,7 @@ export const RoomProvider: React.FC<{ children: React.ReactNode }> = ({ children
         isLoading,
         refreshData,
         addMember: handleAddMember,
+        updateMember: handleUpdateMember,
         deleteMember: handleDeleteMember,
         addExpense: handleAddExpense,
         updateExpense: handleUpdateExpense,

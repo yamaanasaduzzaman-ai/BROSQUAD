@@ -89,34 +89,53 @@ export const DataRepository = {
   // Members
   async getMembers(): Promise<Profile[]> {
     if (isSupabaseConfigured && supabase) {
-      const { data, error } = await supabase.from('profiles').select('*').order('created_at', { ascending: true });
-      if (!error && data && data.length > 0) return data as Profile[];
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .order('role', { ascending: true })
+        .order('created_at', { ascending: true });
+      if (!error && data) return data as Profile[];
     }
     return loadLocalDB().members;
   },
 
-  async addMember(data: { full_name: string; email?: string; phone?: string }): Promise<Profile> {
+  async addMember(data: {
+    full_name: string;
+    username: string;
+    password?: string;
+    email?: string;
+    phone?: string;
+    role?: 'admin' | 'member';
+  }): Promise<Profile> {
     const name = data.full_name.trim();
     if (!name) throw new Error('Member name is required');
+    const username = data.username.trim().toLowerCase();
+    if (!username) throw new Error('User ID / Username is required');
+    const password = data.password?.trim() || '123456';
+    const role = data.role || 'member';
 
-    const id = `u-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
-    const email = data.email?.trim() || `${name.toLowerCase().replace(/[^a-z0-9]/g, '') || 'member'}@brosquad.local`;
+    const id = `u-${username.replace(/[^a-z0-9]/g, '') || 'user'}-${Date.now().toString(36)}`;
+    const email = data.email?.trim() || `${username}@brosquad.local`;
 
     const newMember: Profile = {
       id,
+      username,
+      password,
       full_name: name,
       email,
       phone: data.phone?.trim() || null,
+      role,
       avatar_url: null,
       created_at: new Date().toISOString(),
     };
 
     if (isSupabaseConfigured && supabase) {
-      await supabase.from('profiles').insert(newMember);
+      const { error } = await supabase.from('profiles').insert(newMember);
+      if (error) throw error;
       await supabase.from('room_members').insert({
         room_id: INITIAL_ROOM.id,
         user_id: id,
-        role: 'member',
+        role,
       });
     }
 
@@ -128,13 +147,16 @@ export const DataRepository = {
 
   async deleteMember(userId: string): Promise<void> {
     if (isSupabaseConfigured && supabase) {
-      await supabase.from('profiles').delete().eq('id', userId);
+      const { error } = await supabase.from('profiles').delete().eq('id', userId);
+      if (error) throw error;
     }
     const db = loadLocalDB();
     db.members = db.members.filter((m) => m.id !== userId);
+    db.expenses = db.expenses.filter((e) => e.paid_by !== userId && e.created_by !== userId);
     db.expenses.forEach((exp) => {
       exp.participants = exp.participants.filter((p) => p.user_id !== userId);
     });
+    db.settlements = db.settlements.filter((s) => s.sender_id !== userId && s.receiver_id !== userId);
     saveLocalDB(db);
   },
 
@@ -146,7 +168,16 @@ export const DataRepository = {
         .eq('id', userId)
         .select()
         .single();
-      if (!error && data) return data as Profile;
+      if (error) throw error;
+      if (data) {
+        const db = loadLocalDB();
+        const index = db.members.findIndex((m) => m.id === userId);
+        if (index !== -1) {
+          db.members[index] = { ...db.members[index], ...updates };
+          saveLocalDB(db);
+        }
+        return data as Profile;
+      }
     }
 
     const db = loadLocalDB();
