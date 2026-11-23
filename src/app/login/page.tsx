@@ -141,20 +141,6 @@ export default function LoginPage() {
             </GlassButton>
           </form>
         </GlassCard>
-
-        {/* Initial Setup Info Callout */}
-        <div className="p-3 rounded-2xl bg-white/60 backdrop-blur-md border border-white/80 text-center space-y-1 shadow-xs">
-          <p className="text-[11px] font-bold text-navy-900">
-            👑 Initial Admin Credentials
-          </p>
-          <p className="text-[10px] text-text-secondary">
-            User ID: <span className="font-mono font-bold text-navy-950 bg-navy-100/80 px-1 py-0.5 rounded">admin</span>
-            {' '}· Password: <span className="font-mono font-bold text-navy-950 bg-navy-100/80 px-1 py-0.5 rounded">admin123</span>
-          </p>
-          <p className="text-[9px] text-text-muted">
-            Admin can create roommate accounts and change password from the dashboard.
-          </p>
-        </div>
       </div>
     </div>
   );
