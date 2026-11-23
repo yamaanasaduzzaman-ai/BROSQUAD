@@ -106,6 +106,7 @@ export const DataRepository = {
     email?: string;
     phone?: string;
     role?: 'admin' | 'member';
+    avatar_url?: string | null;
   }): Promise<Profile> {
     const name = data.full_name.trim();
     if (!name) throw new Error('Member name is required');
@@ -125,7 +126,7 @@ export const DataRepository = {
       email,
       phone: data.phone?.trim() || null,
       role,
-      avatar_url: null,
+      avatar_url: data.avatar_url || null,
       created_at: new Date().toISOString(),
     };
 

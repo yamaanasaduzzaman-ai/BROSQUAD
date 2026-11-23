@@ -2,12 +2,14 @@
 
 import React from 'react';
 import { useRoom } from '../../context/RoomContext';
+import { useAuth } from '../../context/AuthContext';
 import { GlassCard } from '../UI/GlassCard';
-import { formatBDT, formatDate, getInitials, getAvatarColor } from '../../lib/formatters';
+import { formatBDT } from '../../lib/formatters';
 import { ArrowRight, History, Trash2 } from 'lucide-react';
 
 export const SettlementHistory: React.FC = () => {
   const { settlements, deleteSettlement } = useRoom();
+  const { isAdmin } = useAuth();
 
   return (
     <GlassCard className="p-3">
@@ -50,12 +52,15 @@ export const SettlementHistory: React.FC = () => {
                   <span className="font-black text-emerald-700">
                     {formatBDT(set.amount_paisa)}
                   </span>
-                  <button
-                    onClick={() => deleteSettlement(set.id)}
-                    className="p-1 text-text-muted hover:text-rose-600 transition-colors"
-                  >
-                    <Trash2 className="w-3 h-3" />
-                  </button>
+                  {isAdmin && (
+                    <button
+                      onClick={() => deleteSettlement(set.id)}
+                      className="p-1 text-text-muted hover:text-rose-600 transition-colors"
+                      title="Delete settlement"
+                    >
+                      <Trash2 className="w-3 h-3" />
+                    </button>
+                  )}
                 </div>
               </div>
             );

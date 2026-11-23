@@ -8,7 +8,8 @@ import { GlassButton } from '../../components/UI/GlassButton';
 import { AddMemberModal } from '../../components/Members/AddMemberModal';
 import { EditMemberModal } from '../../components/Members/EditMemberModal';
 import { Modal } from '../../components/UI/Modal';
-import { formatBDT, formatDate, getInitials, getAvatarColor } from '../../lib/formatters';
+import { Avatar } from '../../components/UI/Avatar';
+import { formatBDT, formatDate } from '../../lib/formatters';
 import { MemberBalance, Profile } from '../../lib/types';
 import {
   Users,
@@ -98,8 +99,6 @@ export default function MembersPage() {
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
           {members.map((m) => {
             const isMe = m.id === currentUser?.id;
-            const initials = getInitials(m.full_name);
-            const color = getAvatarColor(m.id);
             const balanceObj = memberBalances.find((b) => b.user_id === m.id);
             const netBalance = balanceObj?.net_balance_paisa || 0;
             const isReceivable = netBalance > 0;
@@ -119,11 +118,12 @@ export default function MembersPage() {
                     }}
                     className="flex items-center gap-2.5 min-w-0 flex-1 cursor-pointer"
                   >
-                    <div
-                      className={`w-9 h-9 rounded-xl bg-gradient-to-tr ${color.bg} text-white font-black text-xs flex items-center justify-center shrink-0 shadow-sm`}
-                    >
-                      {initials}
-                    </div>
+                    <Avatar
+                      name={m.full_name}
+                      id={m.id}
+                      avatarUrl={m.avatar_url}
+                      size="md"
+                    />
                     <div className="min-w-0">
                       <div className="flex items-center gap-1.5">
                         <p className="text-xs font-bold text-navy-950 truncate">

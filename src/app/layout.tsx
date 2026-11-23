@@ -3,8 +3,7 @@ import './globals.css';
 import { ToastProvider } from '../context/ToastContext';
 import { AuthProvider } from '../context/AuthContext';
 import { RoomProvider } from '../context/RoomContext';
-import { Header } from '../components/Navigation/Header';
-import { BottomNav } from '../components/Navigation/BottomNav';
+import { AuthGuard } from '../components/Auth/AuthGuard';
 import { ServiceWorkerRegister } from '../components/ServiceWorkerRegister';
 
 export const metadata: Metadata = {
@@ -42,13 +41,9 @@ export default function RootLayout({
         <ToastProvider>
           <AuthProvider>
             <RoomProvider>
-              <div className="min-h-screen flex flex-col">
-                <Header />
-                <main className="flex-1 max-w-4xl w-full mx-auto px-2 sm:px-4 pt-2 sm:pt-3">
-                  {children}
-                </main>
-                <BottomNav />
-              </div>
+              <AuthGuard>
+                {children}
+              </AuthGuard>
               <ServiceWorkerRegister />
             </RoomProvider>
           </AuthProvider>

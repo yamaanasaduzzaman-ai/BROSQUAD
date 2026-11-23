@@ -7,7 +7,8 @@ import { useRoom } from '../../context/RoomContext';
 import { Modal } from '../UI/Modal';
 import { GlassButton } from '../UI/GlassButton';
 import { GlassBadge } from '../UI/GlassBadge';
-import { formatBDT, formatDate, getInitials, getAvatarColor } from '../../lib/formatters';
+import { Avatar } from '../UI/Avatar';
+import { formatBDT, formatDate } from '../../lib/formatters';
 import {
   Calendar,
   CreditCard,
@@ -41,7 +42,7 @@ export const ExpenseDetailModal: React.FC<ExpenseDetailModalProps> = ({
 
   const isPayer = expense.paid_by === currentUser?.id;
   const isCreator = expense.created_by === currentUser?.id;
-  const canModify = isAdmin || isPayer || isCreator;
+  const canModify = isAdmin; // Only Admin can edit or delete expenses
   const payerName = expense.payer?.full_name || 'Roommate';
 
   const handleDelete = async () => {
@@ -82,14 +83,22 @@ export const ExpenseDetailModal: React.FC<ExpenseDetailModalProps> = ({
 
         {/* Paid By & Date Info */}
         <div className="grid grid-cols-2 gap-3">
-          <div className="p-3 rounded-2xl bg-navy-50/80 border border-navy-100">
-            <span className="text-[10px] uppercase font-bold text-text-secondary flex items-center gap-1">
-              <CreditCard className="w-3 h-3 text-accent" />
-              Paid By
-            </span>
-            <p className="text-xs sm:text-sm font-bold text-navy-950 mt-1">
-              {isPayer ? 'You' : payerName}
-            </p>
+          <div className="p-3 rounded-2xl bg-navy-50/80 border border-navy-100 flex items-center justify-between">
+            <div>
+              <span className="text-[10px] uppercase font-bold text-text-secondary flex items-center gap-1">
+                <CreditCard className="w-3 h-3 text-accent" />
+                Paid By
+              </span>
+              <p className="text-xs sm:text-sm font-bold text-navy-950 mt-1">
+                {isPayer ? 'You' : payerName}
+              </p>
+            </div>
+            <Avatar
+              name={payerName}
+              id={expense.paid_by}
+              avatarUrl={expense.payer?.avatar_url}
+              size="sm"
+            />
           </div>
 
           <div className="p-3 rounded-2xl bg-navy-50/80 border border-navy-100">
@@ -112,8 +121,6 @@ export const ExpenseDetailModal: React.FC<ExpenseDetailModalProps> = ({
             {expense.participants.map((p) => {
               const name = p.profile?.full_name || 'Roommate';
               const isThisMe = p.user_id === currentUser?.id;
-              const color = getAvatarColor(p.user_id);
-              const inits = getInitials(name);
 
               return (
                 <div
@@ -125,11 +132,12 @@ export const ExpenseDetailModal: React.FC<ExpenseDetailModalProps> = ({
                   }`}
                 >
                   <div className="flex items-center gap-2.5">
-                    <div
-                      className={`w-7 h-7 rounded-lg bg-gradient-to-tr ${color.bg} text-white font-bold text-[10px] flex items-center justify-center`}
-                    >
-                      {inits}
-                    </div>
+                    <Avatar
+                      name={name}
+                      id={p.user_id}
+                      avatarUrl={p.profile?.avatar_url}
+                      size="sm"
+                    />
                     <div>
                       <p className="text-xs font-bold text-navy-950">
                         {name} {isThisMe ? '(You)' : ''}

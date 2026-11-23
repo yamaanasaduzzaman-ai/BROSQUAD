@@ -32,6 +32,7 @@ interface RoomContextType {
     email?: string;
     phone?: string;
     role?: 'admin' | 'member';
+    avatar_url?: string | null;
   }) => Promise<Profile>;
   updateMember: (id: string, updates: Partial<Profile>) => Promise<Profile>;
   deleteMember: (id: string) => Promise<void>;
@@ -138,6 +139,7 @@ export const RoomProvider: React.FC<{ children: React.ReactNode }> = ({ children
     email?: string;
     phone?: string;
     role?: 'admin' | 'member';
+    avatar_url?: string | null;
   }): Promise<Profile> => {
     const created = await DataRepository.addMember(data);
     await refreshData();

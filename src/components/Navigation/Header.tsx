@@ -19,8 +19,8 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useRoom } from '../../context/RoomContext';
-import { getInitials, getAvatarColor } from '../../lib/formatters';
 import { AddMemberModal } from '../Members/AddMemberModal';
+import { Avatar } from '../UI/Avatar';
 
 export const Header: React.FC = () => {
   const pathname = usePathname();
@@ -28,9 +28,6 @@ export const Header: React.FC = () => {
   const { room, members } = useRoom();
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [showAddMember, setShowAddMember] = useState(false);
-
-  const initials = currentUser ? getInitials(currentUser.full_name) : 'BS';
-  const avatarStyle = currentUser ? getAvatarColor(currentUser.id) : { bg: 'from-primary to-accent', text: 'text-white', border: 'border-white' };
 
   return (
     <>
@@ -106,14 +103,20 @@ export const Header: React.FC = () => {
                 onClick={() => setShowUserMenu(!showUserMenu)}
                 className="flex items-center gap-1.5 p-1 sm:px-2 sm:py-1 rounded-xl bg-white/70 hover:bg-white text-navy-900 border border-white/80 transition-all"
               >
-                <div
-                  className={`w-6 h-6 rounded-lg bg-gradient-to-tr ${avatarStyle.bg} flex items-center justify-center text-white font-bold text-[10px]`}
-                >
-                  {initials}
-                </div>
+                <Avatar
+                  name={currentUser?.full_name || 'Member'}
+                  id={currentUser?.id}
+                  avatarUrl={currentUser?.avatar_url}
+                  size="sm"
+                />
                 <span className="hidden sm:inline text-xs font-bold text-navy-900 truncate max-w-[80px]">
                   {currentUser?.full_name?.split(' ')[0] || 'Member'}
                 </span>
+                {isAdmin && (
+                  <span className="hidden sm:inline text-[9px] bg-accent/15 text-accent font-black px-1 rounded">
+                    Admin
+                  </span>
+                )}
                 <ChevronDown className="w-3 h-3 text-text-secondary" />
               </button>
 
@@ -123,27 +126,27 @@ export const Header: React.FC = () => {
                     <span className="text-[10px] uppercase font-bold text-text-secondary">
                       Switch Member
                     </span>
-                    <button
-                      onClick={() => {
-                        setShowUserMenu(false);
-                        setShowAddMember(true);
-                      }}
-                      className="text-[10px] font-bold text-accent hover:underline flex items-center gap-0.5"
-                    >
-                      <Plus className="w-2.5 h-2.5" /> New
-                    </button>
+                    {isAdmin && (
+                      <button
+                        onClick={() => {
+                          setShowUserMenu(false);
+                          setShowAddMember(true);
+                        }}
+                        className="text-[10px] font-bold text-accent hover:underline flex items-center gap-0.5"
+                      >
+                        <Plus className="w-2.5 h-2.5" /> New
+                      </button>
+                    )}
                   </div>
 
                   <div className="space-y-0.5 max-h-48 overflow-y-auto">
                     {members.length === 0 ? (
                       <p className="text-[11px] text-text-secondary px-2 py-1.5">
-                        No members yet. Click &apos;New&apos; to add.
+                        No members yet.
                       </p>
                     ) : (
                       members.map((m) => {
                         const isSelected = m.id === currentUser?.id;
-                        const mInit = getInitials(m.full_name);
-                        const mColor = getAvatarColor(m.id);
 
                         return (
                           <button
@@ -159,11 +162,12 @@ export const Header: React.FC = () => {
                             }`}
                           >
                             <div className="flex items-center gap-2 truncate">
-                              <div
-                                className={`w-5 h-5 rounded-md bg-gradient-to-tr ${mColor.bg} text-white flex items-center justify-center text-[9px] font-bold shrink-0`}
-                              >
-                                {mInit}
-                              </div>
+                              <Avatar
+                                name={m.full_name}
+                                id={m.id}
+                                avatarUrl={m.avatar_url}
+                                size="xs"
+                              />
                               <span className="truncate">{m.full_name}</span>
                             </div>
                             {isSelected && (

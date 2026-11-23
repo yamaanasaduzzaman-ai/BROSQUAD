@@ -1,13 +1,14 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '../../context/AuthContext';
 import { useRoom } from '../../context/RoomContext';
 import { useToast } from '../../context/ToastContext';
 import { GlassCard } from '../../components/UI/GlassCard';
 import { GlassButton } from '../../components/UI/GlassButton';
-import { getInitials, getAvatarColor } from '../../lib/formatters';
+import { Avatar } from '../../components/UI/Avatar';
+import { AvatarUploader } from '../../components/UI/AvatarUploader';
 import {
   User,
   LogOut,
@@ -27,14 +28,23 @@ export default function SettingsPage() {
   const { showToast } = useToast();
 
   const [fullName, setFullName] = useState(currentUser?.full_name || '');
+  const [username, setUsername] = useState(currentUser?.username || '');
   const [phone, setPhone] = useState(currentUser?.phone || '');
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(currentUser?.avatar_url || null);
+
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [isSaving, setIsSaving] = useState(false);
   const [isChangingPass, setIsChangingPass] = useState(false);
 
-  const initials = currentUser ? getInitials(currentUser.full_name) : 'BS';
-  const color = currentUser ? getAvatarColor(currentUser.id) : { bg: 'from-primary to-accent', text: 'text-white', border: 'border-white' };
+  useEffect(() => {
+    if (currentUser) {
+      setFullName(currentUser.full_name || '');
+      setUsername(currentUser.username || '');
+      setPhone(currentUser.phone || '');
+      setAvatarUrl(currentUser.avatar_url || null);
+    }
+  }, [currentUser]);
 
   const handleSaveProfile = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -42,16 +52,23 @@ export default function SettingsPage() {
       showToast('Name cannot be empty', 'error');
       return;
     }
+    const cleanUsername = username.trim().toLowerCase().replace(/[^a-z0-9_-]/g, '');
+    if (!cleanUsername) {
+      showToast('Username cannot be empty', 'error');
+      return;
+    }
 
     try {
       setIsSaving(true);
       await updateProfile({
         full_name: fullName.trim(),
+        username: cleanUsername,
         phone: phone.trim() || null,
+        avatar_url: avatarUrl,
       });
-      showToast('Profile updated!', 'success');
+      showToast('Profile updated successfully!', 'success');
     } catch (err: any) {
-      showToast(err.message || 'Failed to update', 'error');
+      showToast(err.message || 'Failed to update profile', 'error');
     } finally {
       setIsSaving(false);
     }
@@ -87,7 +104,6 @@ export default function SettingsPage() {
     if (confirm('Clear local browser cache and reload fresh data from database?')) {
       if (typeof window !== 'undefined') {
         localStorage.removeItem('brosquad_db_v2');
-        localStorage.removeItem('brosquad_current_user_id');
       }
       refreshData();
       showToast('Local cache cleared. Reloading...', 'info');
@@ -104,12 +120,13 @@ export default function SettingsPage() {
 
       {/* Profile Overview Card */}
       <GlassCard className="p-3 flex items-center justify-between shadow-glass-sm">
-        <div className="flex items-center gap-2.5">
-          <div
-            className={`w-10 h-10 rounded-xl bg-gradient-to-tr ${color.bg} text-white font-black text-sm flex items-center justify-center shrink-0 shadow-sm`}
-          >
-            {initials}
-          </div>
+        <div className="flex items-center gap-3">
+          <Avatar
+            name={currentUser?.full_name || 'Member'}
+            id={currentUser?.id}
+            avatarUrl={currentUser?.avatar_url}
+            size="lg"
+          />
           <div>
             <div className="flex items-center gap-1.5">
               <h2 className="text-xs sm:text-sm font-bold text-navy-950">
@@ -148,10 +165,17 @@ export default function SettingsPage() {
       <GlassCard className="p-3 space-y-3">
         <h3 className="text-xs font-bold uppercase text-navy-950 flex items-center gap-1.5 pb-1.5 border-b border-navy-100">
           <User className="w-3.5 h-3.5 text-primary" />
-          Edit Personal Details
+          Edit Profile & Photo
         </h3>
 
-        <form onSubmit={handleSaveProfile} className="space-y-2.5">
+        <form onSubmit={handleSaveProfile} className="space-y-3">
+          {/* Avatar Uploader */}
+          <AvatarUploader
+            name={fullName}
+            avatarUrl={avatarUrl}
+            onChange={setAvatarUrl}
+          />
+
           <div>
             <label className="block text-[11px] font-bold text-navy-800 mb-1">
               Full Name
@@ -167,15 +191,34 @@ export default function SettingsPage() {
 
           <div>
             <label className="block text-[11px] font-bold text-navy-800 mb-1">
+              User ID / Username
+            </label>
+            <div className="relative">
+              <AtSign className="w-3.5 h-3.5 text-text-muted absolute left-3 top-1/2 -translate-y-1/2" />
+              <input
+                type="text"
+                required
+                value={username}
+                onChange={(e) => setUsername(e.target.value.toLowerCase().replace(/\s+/g, ''))}
+                className="w-full pl-8 pr-3 py-1.5 rounded-xl bg-white/80 border border-navy-200/80 text-navy-950 text-xs font-bold outline-none focus:border-accent"
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-[11px] font-bold text-navy-800 mb-1">
               Phone Number
             </label>
-            <input
-              type="text"
-              placeholder="+880 1700-000000"
-              value={phone}
-              onChange={(e) => setPhone(e.target.value)}
-              className="w-full px-3 py-1.5 rounded-xl bg-white/80 border border-navy-200/80 text-navy-950 text-xs font-semibold outline-none focus:border-accent"
-            />
+            <div className="relative">
+              <Phone className="w-3.5 h-3.5 text-text-muted absolute left-3 top-1/2 -translate-y-1/2" />
+              <input
+                type="text"
+                placeholder="+880 1700-000000"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                className="w-full pl-8 pr-3 py-1.5 rounded-xl bg-white/80 border border-navy-200/80 text-navy-950 text-xs font-semibold outline-none focus:border-accent"
+              />
+            </div>
           </div>
 
           <GlassButton
@@ -185,7 +228,7 @@ export default function SettingsPage() {
             isLoading={isSaving}
             icon={<Save className="w-3.5 h-3.5" />}
           >
-            Save Details
+            Save Profile
           </GlassButton>
         </form>
       </GlassCard>
@@ -246,17 +289,17 @@ export default function SettingsPage() {
           <div>
             <h4 className="text-xs font-bold text-navy-950 flex items-center gap-1">
               <RefreshCw className="w-3 h-3 text-text-secondary" />
-              Sync & Clear Local Cache
+              Sync & Refresh Cache
             </h4>
             <p className="text-[10px] text-text-secondary mt-0.5">
-              Purges local storage and re-downloads fresh data from Supabase.
+              Re-downloads fresh data directly from Supabase.
             </p>
           </div>
           <button
             onClick={handleResetLocalCache}
             className="px-2.5 py-1.5 rounded-xl bg-navy-100 hover:bg-navy-200 text-navy-900 text-xs font-bold transition-colors"
           >
-            Sync / Reset Cache
+            Sync / Refresh
           </button>
         </div>
       </GlassCard>

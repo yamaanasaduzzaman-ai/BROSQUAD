@@ -4,7 +4,8 @@ import React from 'react';
 import { Expense } from '../../lib/types';
 import { useAuth } from '../../context/AuthContext';
 import { GlassCard } from '../UI/GlassCard';
-import { formatBDT, formatDate, getInitials, getAvatarColor } from '../../lib/formatters';
+import { Avatar } from '../UI/Avatar';
+import { formatBDT, formatDate } from '../../lib/formatters';
 import { Calendar, Tag, ChevronRight } from 'lucide-react';
 
 interface ExpenseCardProps {
@@ -19,10 +20,7 @@ export const ExpenseCard: React.FC<ExpenseCardProps> = ({
   const { currentUser } = useAuth();
   const isPayerMe = expense.paid_by === currentUser?.id;
   const myParticipant = expense.participants.find((p) => p.user_id === currentUser?.id);
-
   const payerName = expense.payer?.full_name || 'Roommate';
-  const payerInitials = getInitials(payerName);
-  const payerColor = getAvatarColor(expense.paid_by);
 
   return (
     <GlassCard
@@ -33,12 +31,12 @@ export const ExpenseCard: React.FC<ExpenseCardProps> = ({
       <div className="flex items-center justify-between gap-2">
         {/* Left: Info */}
         <div className="flex items-center gap-2.5 min-w-0 flex-1">
-          <div
-            className={`w-7 h-7 rounded-lg bg-gradient-to-tr ${payerColor.bg} text-white text-[10px] font-bold flex items-center justify-center shrink-0`}
-            title={`Paid by ${isPayerMe ? 'You' : payerName}`}
-          >
-            {payerInitials}
-          </div>
+          <Avatar
+            name={payerName}
+            id={expense.paid_by}
+            avatarUrl={expense.payer?.avatar_url}
+            size="sm"
+          />
 
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-1.5 flex-wrap">

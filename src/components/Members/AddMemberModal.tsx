@@ -5,6 +5,7 @@ import { useRoom } from '../../context/RoomContext';
 import { useAuth } from '../../context/AuthContext';
 import { Modal } from '../UI/Modal';
 import { GlassButton } from '../UI/GlassButton';
+import { AvatarUploader } from '../UI/AvatarUploader';
 import { UserPlus, User, Key, Phone, ShieldCheck, AtSign, AlertCircle } from 'lucide-react';
 
 interface AddMemberModalProps {
@@ -19,6 +20,7 @@ export const AddMemberModal: React.FC<AddMemberModalProps> = ({ isOpen, onClose 
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [phone, setPhone] = useState('');
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [role, setRole] = useState<'member' | 'admin'>('member');
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -50,6 +52,7 @@ export const AddMemberModal: React.FC<AddMemberModalProps> = ({ isOpen, onClose 
         username: cleanUsername,
         password: password.trim(),
         phone: phone.trim() || undefined,
+        avatar_url: avatarUrl,
         role,
       });
 
@@ -62,6 +65,7 @@ export const AddMemberModal: React.FC<AddMemberModalProps> = ({ isOpen, onClose 
       setUsername('');
       setPassword('');
       setPhone('');
+      setAvatarUrl(null);
       setRole('member');
       onClose();
     } catch (err: any) {
@@ -73,13 +77,20 @@ export const AddMemberModal: React.FC<AddMemberModalProps> = ({ isOpen, onClose 
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} title="Create Roommate Account" maxWidth="sm">
-      <form onSubmit={handleSubmit} className="space-y-2.5">
+      <form onSubmit={handleSubmit} className="space-y-3">
         {error && (
           <div className="flex items-center gap-1.5 p-2 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs">
             <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
             <span>{error}</span>
           </div>
         )}
+
+        {/* Profile Picture Uploader */}
+        <AvatarUploader
+          name={name}
+          avatarUrl={avatarUrl}
+          onChange={setAvatarUrl}
+        />
 
         {/* Full Name */}
         <div>

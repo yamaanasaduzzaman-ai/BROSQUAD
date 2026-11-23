@@ -3,9 +3,10 @@
 import React from 'react';
 import Link from 'next/link';
 import { GlassCard } from '../UI/GlassCard';
+import { Avatar } from '../UI/Avatar';
 import { useRoom } from '../../context/RoomContext';
 import { useAuth } from '../../context/AuthContext';
-import { formatBDT, getInitials, getAvatarColor } from '../../lib/formatters';
+import { formatBDT } from '../../lib/formatters';
 import { Users, UserPlus, ArrowUpRight, ArrowDownLeft, ChevronRight } from 'lucide-react';
 
 interface MemberBalancesOverviewProps {
@@ -61,8 +62,6 @@ export const MemberBalancesOverview: React.FC<MemberBalancesOverviewProps> = ({
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 mt-2">
           {memberBalances.map((m) => {
             const isMe = m.user_id === currentUser?.id;
-            const initials = getInitials(m.full_name);
-            const avatarStyle = getAvatarColor(m.user_id);
             const isReceivable = m.net_balance_paisa > 0;
             const isPayable = m.net_balance_paisa < 0;
 
@@ -76,11 +75,12 @@ export const MemberBalancesOverview: React.FC<MemberBalancesOverviewProps> = ({
                 }`}
               >
                 <div className="flex items-center gap-2 min-w-0">
-                  <div
-                    className={`w-6 h-6 rounded-lg bg-gradient-to-tr ${avatarStyle.bg} text-white font-bold text-[9px] flex items-center justify-center shrink-0`}
-                  >
-                    {initials}
-                  </div>
+                  <Avatar
+                    name={m.full_name}
+                    id={m.user_id}
+                    avatarUrl={m.avatar_url}
+                    size="sm"
+                  />
                   <div className="min-w-0">
                     <p className="font-bold text-navy-900 truncate leading-tight">
                       {m.full_name} {isMe && <span className="text-accent text-[10px]">(You)</span>}

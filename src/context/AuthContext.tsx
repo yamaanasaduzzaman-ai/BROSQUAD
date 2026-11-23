@@ -3,7 +3,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { Profile } from '../lib/types';
 import { DataRepository } from '../lib/storage';
-import { supabase, isSupabaseConfigured } from '../lib/supabase/client';
 
 interface AuthContextType {
   currentUser: Profile | null;
@@ -12,7 +11,7 @@ interface AuthContextType {
   login: (emailOrUsername: string, password?: string) => Promise<{ success: boolean; error?: string }>;
   logout: () => Promise<void>;
   switchUser: (userId: string) => Promise<void>;
-  updateProfile: (updates: Partial<Profile>) => Promise<void>;
+  updateProfile: (updates: Partial<Profile>) => Promise<Profile>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -25,7 +24,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const isAdmin = currentUser?.role === 'admin';
 
-  // Initialize persistent session
+  // Initialize persistent session (Strict: No auto-login without valid saved session)
   useEffect(() => {
     let mounted = true;
 
@@ -34,16 +33,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         const members = await DataRepository.getMembers();
         const savedUserId = typeof window !== 'undefined' ? localStorage.getItem(AUTH_STORAGE_KEY) : null;
 
-        let matched = members.find((m) => m.id === savedUserId);
-        
-        // If no user was saved, but an admin exists, default to admin
-        if (!matched && members.length > 0) {
-          const admin = members.find((m) => m.role === 'admin') || members[0];
-          matched = admin;
-          if (typeof window !== 'undefined') {
-            localStorage.setItem(AUTH_STORAGE_KEY, admin.id);
-          }
-        }
+        const matched = savedUserId ? members.find((m) => m.id === savedUserId) : null;
 
         if (mounted) {
           setCurrentUser(matched || null);
@@ -128,10 +118,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  const updateProfile = async (updates: Partial<Profile>): Promise<void> => {
-    if (!currentUser) return;
+  const updateProfile = async (updates: Partial<Profile>): Promise<Profile> => {
+    if (!currentUser) throw new Error('Not logged in');
     const updated = await DataRepository.updateMemberProfile(currentUser.id, updates);
     setCurrentUser(updated);
+    return updated;
   };
 
   return (
