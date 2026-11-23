@@ -27,7 +27,7 @@ import {
 
 export default function MembersPage() {
   const { members, memberBalances, expenses, deleteMember } = useRoom();
-  const { currentUser, isAdmin, switchUser } = useAuth();
+  const { currentUser, isAdmin } = useAuth();
 
   const [showAddMember, setShowAddMember] = useState(false);
   const [editingMember, setEditingMember] = useState<Profile | null>(null);
@@ -174,15 +174,6 @@ export default function MembersPage() {
                       {isReceivable ? '+' : ''}
                       {formatBDT(netBalance)}
                     </span>
-
-                    {/* Switch User */}
-                    <button
-                      onClick={() => switchUser(m.id)}
-                      className="px-1.5 py-1 rounded-lg hover:bg-navy-100 text-[10px] font-bold text-accent"
-                      title="Switch active user"
-                    >
-                      Switch
-                    </button>
 
                     {/* Admin Actions: Edit & Delete */}
                     {isAdmin && (

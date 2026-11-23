@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import {
   Bell,
   Users,
@@ -24,7 +24,8 @@ import { Avatar } from '../UI/Avatar';
 
 export const Header: React.FC = () => {
   const pathname = usePathname();
-  const { currentUser, isAdmin, switchUser, logout } = useAuth();
+  const router = useRouter();
+  const { currentUser, isAdmin, logout } = useAuth();
   const { room, members } = useRoom();
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [showAddMember, setShowAddMember] = useState(false);
@@ -121,81 +122,44 @@ export const Header: React.FC = () => {
               </button>
 
               {showUserMenu && (
-                <div className="absolute right-0 mt-1 w-56 rounded-2xl bg-white/95 backdrop-blur-2xl border border-white/80 shadow-floating p-2 z-50 animate-in fade-in">
-                  <div className="px-2 py-1 border-b border-navy-100 mb-1 flex items-center justify-between">
-                    <span className="text-[10px] uppercase font-bold text-text-secondary">
-                      Switch Member
-                    </span>
-                    {isAdmin && (
-                      <button
-                        onClick={() => {
-                          setShowUserMenu(false);
-                          setShowAddMember(true);
-                        }}
-                        className="text-[10px] font-bold text-accent hover:underline flex items-center gap-0.5"
-                      >
-                        <Plus className="w-2.5 h-2.5" /> New
-                      </button>
-                    )}
-                  </div>
-
-                  <div className="space-y-0.5 max-h-48 overflow-y-auto">
-                    {members.length === 0 ? (
-                      <p className="text-[11px] text-text-secondary px-2 py-1.5">
-                        No members yet.
+                <div className="absolute right-0 mt-1 w-52 rounded-2xl bg-white/95 backdrop-blur-2xl border border-white/80 shadow-floating p-2 z-50 animate-in fade-in">
+                  {/* Current User Card */}
+                  <div className="p-2 rounded-xl bg-navy-50/80 mb-1.5 flex items-center gap-2">
+                    <Avatar
+                      name={currentUser?.full_name || 'Member'}
+                      id={currentUser?.id}
+                      avatarUrl={currentUser?.avatar_url}
+                      size="sm"
+                    />
+                    <div className="min-w-0 flex-1">
+                      <p className="text-xs font-bold text-navy-950 truncate">
+                        {currentUser?.full_name}
                       </p>
-                    ) : (
-                      members.map((m) => {
-                        const isSelected = m.id === currentUser?.id;
-
-                        return (
-                          <button
-                            key={m.id}
-                            onClick={() => {
-                              switchUser(m.id);
-                              setShowUserMenu(false);
-                            }}
-                            className={`w-full flex items-center justify-between px-2 py-1.5 rounded-lg text-left text-xs transition-colors ${
-                              isSelected
-                                ? 'bg-primary text-white font-bold'
-                                : 'hover:bg-navy-50 text-navy-800'
-                            }`}
-                          >
-                            <div className="flex items-center gap-2 truncate">
-                              <Avatar
-                                name={m.full_name}
-                                id={m.id}
-                                avatarUrl={m.avatar_url}
-                                size="xs"
-                              />
-                              <span className="truncate">{m.full_name}</span>
-                            </div>
-                            {isSelected && (
-                              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 shrink-0" />
-                            )}
-                          </button>
-                        );
-                      })
-                    )}
+                      <p className="text-[10px] text-text-secondary truncate">
+                        @{currentUser?.username || 'user'} · {currentUser?.role === 'admin' ? 'Admin' : 'Member'}
+                      </p>
+                    </div>
                   </div>
 
-                  <div className="pt-1.5 mt-1 border-t border-navy-100 flex flex-col gap-0.5">
+                  <div className="flex flex-col gap-0.5">
                     <Link
                       href="/settings"
                       onClick={() => setShowUserMenu(false)}
-                      className="flex items-center gap-1.5 px-2 py-1.5 rounded-lg text-xs font-semibold text-navy-800 hover:bg-navy-50"
+                      className="flex items-center gap-2 px-2.5 py-1.5 rounded-xl text-xs font-semibold text-navy-800 hover:bg-navy-50 transition-colors"
                     >
                       <Sliders className="w-3.5 h-3.5 text-text-secondary" />
-                      Settings
+                      Account Settings
                     </Link>
+
                     <button
                       onClick={() => {
                         setShowUserMenu(false);
                         logout();
+                        router.push('/login');
                       }}
-                      className="flex items-center gap-1.5 px-2 py-1.5 rounded-lg text-xs font-semibold text-expense hover:bg-rose-50 w-full text-left"
+                      className="flex items-center gap-2 px-2.5 py-1.5 rounded-xl text-xs font-semibold text-rose-600 hover:bg-rose-50 w-full text-left transition-colors"
                     >
-                      <LogOut className="w-3.5 h-3.5 text-expense" />
+                      <LogOut className="w-3.5 h-3.5 text-rose-600" />
                       Log Out
                     </button>
                   </div>
